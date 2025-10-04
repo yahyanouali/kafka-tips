@@ -17,6 +17,14 @@
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
+    </repositories>
+
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -33,6 +41,21 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-kafka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-confluent-registry-avro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>7.4.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.ws.rs</groupId>
+                    <artifactId>jakarta.ws.rs-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
