@@ -1,58 +1,74 @@
-# kafka-tips
+# Kafka Tips — Quarkus, Kafka (Avro), Redis, and Hexagonal Architecture
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+This project is a minimal reference application that demonstrates:
+- Producing User events to Apache Kafka using Avro
+- Consuming those events and caching Users in Redis
+- Exposing REST endpoints to enqueue users and to query the cached users
+- A simple Hexagonal (Ports & Adapters) architecture in a Quarkus application
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## How it works
+- POST /users accepts a JSON payload for a user and enqueues it to Kafka as an Avro message.
+- A background Kafka consumer reads the Avro messages from the topic and stores them in Redis.
+- GET /cache/users and GET /cache/user/{name} let you query what has been cached.
 
-## Running the application in dev mode
+Key pieces:
+- Inbound ports (use cases): `UserCommandUseCase`, `CacheQueryUseCase`
+- Application services: `UserCommandService`, `CacheQueryService`
+- Outbound ports: `UserEventPublisherPort` (Kafka), `UserCachePort` (Redis)
+- Adapters: `UserProducerService` (Kafka producer), `UserConsumerService` (Kafka consumer), `UserCacheRepository` (Redis)
 
-You can run your application in dev mode that enables live coding using:
+## Prerequisites
+- Docker Desktop or Docker Engine + Docker Compose
+- Java 17+
+- Maven (wrapper included)
 
-```shell script
-./mvnw quarkus:dev
-```
+## Quickstart
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+1) Start infrastructure (Kafka, Schema Registry, Kafka UI, Redis):
 
-## Packaging and running the application
+- Using Docker Compose from the project root:
+  - Linux/macOS: `docker compose up -d`
+  - Windows (PowerShell): `docker compose up -d`
 
-The application can be packaged using:
+Services started by compose.yaml:
+- Kafka broker: localhost:29092 (mapped from container)
+- Confluent Schema Registry: http://localhost:8081
+- Kafka UI: http://localhost:8082
+- Redis: localhost:6379
 
-```shell script
-./mvnw package
-```
+2) Run the application in dev mode (live reload):
+- Linux/macOS: `./mvnw quarkus:dev`
+- Windows (PowerShell): `mvnw.cmd quarkus:dev`
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+Quarkus will listen on http://localhost:8080
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+3) Use the API
+- Enqueue a user (produces Avro to Kafka):
+  - `curl -X POST http://localhost:8080/users -H "Content-Type: application/json" -d '{"name":"alice","age":30}'`
+  - Expected response: `202 Accepted` with body `User enqueued`
+- List cached users (read from Redis):
+  - `curl http://localhost:8080/cache/users`
+- Get one cached user by name:
+  - `curl http://localhost:8080/cache/user/alice`
 
-If you want to build an _über-jar_, execute the following command:
+Note: The consumer stores records under the user name key. Validation requires non-blank name and age >= 0.
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
+## Configuration
+Defaults are provided in `src/main/resources/application.properties`:
+- `kafka.bootstrap.servers=localhost:29092`
+- `kafka.users.topic=users`
+- `kafka.user.group.id=users-consumer`
+- `schema.registry.url=http://localhost:8081`
+- `quarkus.redis.hosts=redis://localhost:6379`
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+You can override any of these with environment variables or system properties if needed.
 
-## Creating a native executable
+## Troubleshooting
+- Ports in use: Stop any service already using 29092 (Kafka), 8081 (Schema Registry), 8082 (Kafka UI), 6379 (Redis), or adjust compose.yaml and application.properties.
+- Clean local Kafka data: Stop compose and remove the `kafka-data` directory if you need a fresh cluster state.
+- No users in cache: Ensure the app is running, Kafka and Schema Registry are up, and the consumer logs show it is subscribed to the `users` topic.
 
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/kafka-tips-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- Apache Kafka Client ([guide](https://quarkus.io/guides/kafka)): Connect to Apache Kafka with its native API
+## Build and package (optional)
+- JVM run jar: `./mvnw package` then `java -jar target/quarkus-app/quarkus-run.jar`
+- Uber-jar: `./mvnw package -Dquarkus.package.jar.type=uber-jar`
+- Native (requires GraalVM or container build): `./mvnw package -Dnative` or `./mvnw package -Dnative -Dquarkus.native.container-build=true`
