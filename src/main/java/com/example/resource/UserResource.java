@@ -1,6 +1,8 @@
-package com.example;
+package com.example.resource;
 
+import com.example.UserDto;
 import com.example.avro.User;
+import com.example.service.UserProducerService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -11,9 +13,9 @@ import jakarta.ws.rs.core.Response;
 @Path( "/users")
 public class UserResource {
 
-    private final UserProducer producer;
+    private final UserProducerService producer;
 
-    public UserResource(UserProducer producer) {
+    public UserResource(UserProducerService producer) {
         this.producer = producer;
     }
 
@@ -21,7 +23,7 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public Response createUser(UserDto user) {
-        producer.produce(new User(user.name(), user.age()));
+        producer.sendUser(new User(user.name(), user.age()));
         return Response.ok().entity("Done").build();
     }
 }
