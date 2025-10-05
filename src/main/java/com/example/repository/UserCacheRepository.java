@@ -1,5 +1,6 @@
 package com.example.repository;
 
+import com.example.application.port.out.UserCachePort;
 import com.example.model.UserDto;
 import com.example.avro.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +18,7 @@ import java.util.Objects;
  * Redis-backed repository to cache users.
  */
 @ApplicationScoped
-public class UserCacheRepository {
+public class UserCacheRepository implements UserCachePort {
 
     private static final Logger log = LoggerFactory.getLogger(UserCacheRepository.class);
 

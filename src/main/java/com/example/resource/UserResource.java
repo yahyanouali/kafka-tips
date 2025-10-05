@@ -1,7 +1,7 @@
 package com.example.resource;
 
+import com.example.application.port.in.UserCommandUseCase;
 import com.example.model.UserDto;
-import com.example.service.UserProducerService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -10,15 +10,15 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 /**
- * REST resource that accepts user creation requests and publishes them to Kafka.
+ * REST resource that accepts user creation requests and publishes them to Kafka via application use case.
  */
 @Path("/users")
 public class UserResource {
 
-    private final UserProducerService producerService;
+    private final UserCommandUseCase userCommand;
 
-    public UserResource(UserProducerService producerService) {
-        this.producerService = producerService;
+    public UserResource(UserCommandUseCase userCommand) {
+        this.userCommand = userCommand;
     }
 
     @POST
@@ -29,7 +29,7 @@ public class UserResource {
             return buildInvalidUserPayloadResponse();
         }
 
-        producerService.publishUser(user);
+        userCommand.createUser(user);
 
         return buildUserEnqueuedResponse();
     }

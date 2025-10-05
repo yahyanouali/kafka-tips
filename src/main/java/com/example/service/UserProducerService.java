@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.application.port.out.UserEventPublisherPort;
 import com.example.model.UserDto;
 import com.example.avro.User;
 import com.example.factory.KafkaProducerFactory;
@@ -15,7 +16,7 @@ import java.util.Objects;
  * Service responsible for publishing User events to Kafka.
  */
 @ApplicationScoped
-public class UserProducerService {
+public class UserProducerService implements UserEventPublisherPort {
 
     private static final Logger log = LoggerFactory.getLogger(UserProducerService.class);
 

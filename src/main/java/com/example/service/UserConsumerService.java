@@ -2,7 +2,7 @@ package com.example.service;
 
 import com.example.avro.User;
 import com.example.factory.KafkaConsumerFactory;
-import com.example.repository.UserCacheRepository;
+import com.example.application.port.out.UserCachePort;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -29,7 +29,7 @@ public class UserConsumerService {
     private static final Logger log = LoggerFactory.getLogger(UserConsumerService.class);
 
     private final KafkaConsumerFactory consumerFactory;
-    private final UserCacheRepository cacheRepository;
+    private final UserCachePort cacheRepository;
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private ExecutorService executor;
@@ -37,7 +37,7 @@ public class UserConsumerService {
     @ConfigProperty(name = "kafka.users.topic")
     String topic;
 
-    public UserConsumerService(KafkaConsumerFactory consumerFactory, UserCacheRepository cacheRepository) {
+    public UserConsumerService(KafkaConsumerFactory consumerFactory, UserCachePort cacheRepository) {
         this.consumerFactory = consumerFactory;
         this.cacheRepository = cacheRepository;
     }
