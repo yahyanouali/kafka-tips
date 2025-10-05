@@ -1,6 +1,6 @@
 package com.example.resource;
 
-import com.example.UserDto;
+import com.example.model.UserDto;
 import com.example.service.UserProducerService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;

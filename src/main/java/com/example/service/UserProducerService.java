@@ -1,6 +1,6 @@
 package com.example.service;
 
-import com.example.UserDto;
+import com.example.model.UserDto;
 import com.example.avro.User;
 import com.example.factory.KafkaProducerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
