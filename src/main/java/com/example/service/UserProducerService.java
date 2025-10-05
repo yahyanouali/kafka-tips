@@ -21,7 +21,7 @@ public class UserProducerService {
 
     private final KafkaProducerFactory producerFactory;
 
-    @ConfigProperty(name = "kafka.user.topic")
+    @ConfigProperty(name = "kafka.users.topic")
     private String topic;
 
     public UserProducerService(KafkaProducerFactory factory) {
