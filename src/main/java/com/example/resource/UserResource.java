@@ -1,7 +1,6 @@
 package com.example.resource;
 
 import com.example.UserDto;
-import com.example.avro.User;
 import com.example.service.UserProducerService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -31,7 +30,7 @@ public class UserResource {
                     .entity("Invalid user payload: 'name' must be non-blank and 'age' must be non-negative.")
                     .build();
         }
-        producerService.sendUser(new User(user.name(), user.age()));
+        producerService.publishUser(user);
         return Response.accepted().entity("User enqueued").build();
     }
 }

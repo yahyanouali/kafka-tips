@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.UserDto;
 import com.example.avro.User;
 import com.example.factory.KafkaProducerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,6 +26,17 @@ public class UserProducerService {
 
     public UserProducerService(KafkaProducerFactory factory) {
         this.producerFactory = factory;
+    }
+
+    /**
+     * Publishes a user described by the API DTO. This method maps the DTO to the Avro schema
+     * and delegates the actual send to Kafka.
+     */
+    public void publishUser(UserDto dto) {
+        Objects.requireNonNull(dto, "dto must not be null");
+        Objects.requireNonNull(dto.name(), "dto.name must not be null");
+        final User avro = new User(dto.name(), dto.age());
+        sendUser(avro);
     }
 
     /**
