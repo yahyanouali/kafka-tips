@@ -8,38 +8,49 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
+/**
+ * Service responsible for publishing User events to Kafka.
+ */
 @ApplicationScoped
 public class UserProducerService {
 
     private static final Logger log = LoggerFactory.getLogger(UserProducerService.class);
+
     private final KafkaProducerFactory producerFactory;
 
     @ConfigProperty(name = "kafka.user.topic")
-    String topic;
+    private String topic;
 
     public UserProducerService(KafkaProducerFactory factory) {
         this.producerFactory = factory;
     }
 
+    /**
+     * Sends the given user to the configured Kafka topic.
+     *
+     * @param user the user payload to be produced
+     */
     public void sendUser(User user) {
-        ProducerRecord<String, User> record = new ProducerRecord<>(this.topic, user.getName(), user);
+        Objects.requireNonNull(user, "user must not be null");
+        final ProducerRecord<String, User> record = new ProducerRecord<>(this.topic, user.getName(), user);
         try {
             producerFactory.getProducer().send(record, (metadata, exception) -> {
                 if (exception != null) {
-                    log.error("Error while producing record", exception);
-                } else {
-                    log.info("Record with key={}, value={} and headers={} sent successfully to [topic: {}, partition: {}, offset: {}, timestamp: {}]",
-                            record.key(),
-                            record.value(),
-                            record.headers().toArray(),
+                    log.error("Failed to produce record to topic={} with key={}", topic, record.key(), exception);
+                } else if (metadata != null) {
+                    log.info("Produced record to topic={}, partition={}, offset={}, timestamp={} (key={}, headers={})",
                             metadata.topic(),
                             metadata.partition(),
                             metadata.offset(),
-                            metadata.timestamp());
+                            metadata.timestamp(),
+                            record.key(),
+                            record.headers().toArray());
                 }
             });
         } catch (Exception e) {
-            log.error("Error sending Avro message", e);
+            log.error("Unexpected error while sending Avro message to topic=" + topic, e);
         }
     }
 }

@@ -7,21 +7,30 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.Properties;
 
+/**
+ * Provides Kafka producer properties sourced from MicroProfile configuration.
+ */
 @ApplicationScoped
 public class KafkaProducerConfig {
 
-    @ConfigProperty(name = "kafka.bootstrap.servers")
-    String bootstrapServers;
+    // Config property names
+    public static final String SCHEMA_REGISTRY_URL_CONFIG = "schema.registry.url";
 
+    @ConfigProperty(name = "kafka.bootstrap.servers")
+    private String bootstrapServers;
+
+    @ConfigProperty(name = SCHEMA_REGISTRY_URL_CONFIG)
+    private String schemaRegistryUrl;
 
     public Properties getProperties() {
-        Properties props = new Properties();
+        final Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.ACKS_CONFIG, "all");
         props.put(ProducerConfig.RETRIES_CONFIG, 2);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
-        props.put("schema.registry.url", System.getProperty("schema.registry.url", "http://localhost:8081"));
+        // Allow system property override while keeping MicroProfile config as default
+        props.put(SCHEMA_REGISTRY_URL_CONFIG, System.getProperty(SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl));
         return props;
     }
 }
