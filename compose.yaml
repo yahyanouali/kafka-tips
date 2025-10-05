@@ -6,9 +6,7 @@ services:
     container_name: kafka
     hostname: kafka
     ports:
-      - "9092:9092"    # accès depuis host
-      - "29092:29092"  # listener alternatif pour host
-      - "9093:9093"    # port controller (interne)
+      - "29092:29092"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
