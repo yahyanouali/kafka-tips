@@ -82,6 +82,7 @@ public class UserConsumerService {
             try {
                 consumer.unsubscribe();
             } catch (Exception ignore) {
+                // ignore
             }
         }
     }
@@ -89,13 +90,17 @@ public class UserConsumerService {
     @PreDestroy
     void stop() {
         running.set(false);
+
         try {
             consumerFactory.getConsumer().wakeup();
         } catch (Exception ignored) {
+            // ignore
         }
+
         if (executor != null) {
             executor.shutdownNow();
         }
+
         log.info("UserConsumerService stopped.");
     }
 }
