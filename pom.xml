@@ -15,6 +15,9 @@
         <quarkus.platform.version>3.28.2</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
+        <kafka-avro-serializer.version>7.4.0</kafka-avro-serializer.version>
+        <log4j-slf4j-impl.version>2.25.2</log4j-slf4j-impl.version>
+        <avro-maven-plugin.version>1.11.0</avro-maven-plugin.version>
     </properties>
 
     <repositories>
@@ -23,7 +26,6 @@
             <url>https://packages.confluent.io/maven/</url>
         </repository>
     </repositories>
-
 
     <dependencyManagement>
         <dependencies>
@@ -49,7 +51,7 @@
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>
-            <version>7.4.0</version>
+            <version>${kafka-avro-serializer.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jakarta.ws.rs</groupId>
@@ -88,10 +90,9 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.25.2</version>
+            <version>${log4j-slf4j-impl.version}</version>
             <scope>compile</scope>
         </dependency>
-
 
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -153,6 +154,26 @@
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>${avro-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>schema</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>src/main/resources/avro</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/avro</outputDirectory>
+                            <stringType>String</stringType> <!-- Use java.lang.String instead of Utf8 -->
+                            <enableDecimalLogicalType>true</enableDecimalLogicalType> <!-- For decimal logical types -->
+                            <fieldVisibility>PRIVATE</fieldVisibility> <!-- Set field visibility -->
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

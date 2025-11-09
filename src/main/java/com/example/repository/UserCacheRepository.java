@@ -1,13 +1,12 @@
 package com.example.repository;
 
 import com.example.application.port.out.UserCachePort;
-import com.example.model.UserDto;
 import com.example.avro.User;
+import com.example.model.UserDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.value.ValueCommands;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
